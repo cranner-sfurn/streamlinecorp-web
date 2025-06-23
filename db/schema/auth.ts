@@ -5,7 +5,7 @@ import {
   boolean,
   integer,
 } from "drizzle-orm/pg-core";
-import { timestamps } from "./common";
+import { timestamps } from "../common";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
