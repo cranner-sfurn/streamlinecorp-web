@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "@/lib/auth-client";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,7 @@ import { Label } from "@/components/ui/label";
 import { DialogClose } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Pencil, Trash2 } from "lucide-react";
 
 const ALLOWED_ROLES = ["admin", "hr-manager"];
 const ALL_ROLES = ["admin", "hr-manager", "user"];
@@ -67,6 +68,24 @@ export default function DashboardPage() {
     password: "",
     roles: ["user"],
   });
+  const [editOpen, setEditOpen] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+  const [editUser, setEditUser] = useState<any | null>(null);
+  const [editContact, setEditContact] = useState<any | null>(null);
+  const [editForm, setEditForm] = useState({
+    firstName: "",
+    surname: "",
+    email: "",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    postcode: "",
+    country: "",
+  });
+  const [editError, setEditError] = useState("");
+  const [editSuccess, setEditSuccess] = useState("");
+  const [deleteUser, setDeleteUser] = useState<any | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   useEffect(() => {
     if (!isPending && session) {
@@ -181,6 +200,39 @@ export default function DashboardPage() {
       setAddLoading(false);
     }
   }
+
+  // Fetch contact details for edit
+  const openEditModal = useCallback(async (user: any) => {
+    setEditUser(user);
+    setEditLoading(true);
+    setEditError("");
+    setEditSuccess("");
+    setEditContact(null);
+    setEditForm({
+      firstName: user.name?.split(".")[0] || "",
+      surname: user.name?.split(".")[1] || "",
+      email: user.email,
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      postcode: "",
+      country: "",
+    });
+    try {
+      const res = await fetch(`/api/contact-details/${user.id}`);
+      const data = await res.json();
+      if (data.contact) {
+        setEditContact(data.contact);
+        setEditForm((f) => ({ ...f, ...data.contact }));
+      }
+      setEditOpen(true);
+    } catch (e) {
+      setEditError("Failed to fetch contact details");
+      setEditOpen(true);
+    } finally {
+      setEditLoading(false);
+    }
+  }, []);
 
   if (isPending || !session) {
     return <div className="p-8">Loading...</div>;
@@ -380,16 +432,17 @@ export default function DashboardPage() {
               <TableHead>Email</TableHead>
               <TableHead>Registration Date</TableHead>
               <TableHead>Roles</TableHead>
+              <TableHead className="w-20">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loadingUsers ? (
               <TableRow>
-                <TableCell colSpan={4}>Loading...</TableCell>
+                <TableCell colSpan={5}>Loading...</TableCell>
               </TableRow>
             ) : users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4}>No users found.</TableCell>
+                <TableCell colSpan={5}>No users found.</TableCell>
               </TableRow>
             ) : (
               users.map((user) => (
@@ -420,6 +473,27 @@ export default function DashboardPage() {
                       .filter((r: string) => r && r !== "user")
                       .join(", ") || "-"}
                   </TableCell>
+                  <TableCell className="flex gap-2 items-center">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => openEditModal(user)}
+                      title="Edit user"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => {
+                        setDeleteUser(user);
+                        setDeleteOpen(true);
+                      }}
+                      title="Delete user"
+                    >
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))
             )}
@@ -445,6 +519,180 @@ export default function DashboardPage() {
           </Button>
         </div>
       </div>
+      {/* Edit User Modal */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="p-0 bg-transparent border-0 shadow-none flex items-center justify-center">
+          <div className="w-full max-w-md space-y-6 rounded-lg bg-white p-8 shadow-2xl dark:bg-zinc-900">
+            <DialogTitle asChild>
+              <VisuallyHidden>Edit User</VisuallyHidden>
+            </DialogTitle>
+            <form className="space-y-6">
+              <h2 className="text-2xl font-bold mb-4 text-center">Edit User</h2>
+              <div className="space-y-2">
+                <Label htmlFor="edit-firstname">First Name</Label>
+                <Input
+                  id="edit-firstname"
+                  value={editForm.firstName}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, firstName: e.target.value }))
+                  }
+                  required
+                  disabled={editLoading}
+                  autoComplete="given-name"
+                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-surname">Surname</Label>
+                <Input
+                  id="edit-surname"
+                  value={editForm.surname}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, surname: e.target.value }))
+                  }
+                  required
+                  disabled={editLoading}
+                  autoComplete="family-name"
+                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-email">Email</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, email: e.target.value }))
+                  }
+                  required
+                  disabled={editLoading}
+                  autoComplete="email"
+                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-address1">Address Line 1</Label>
+                <Input
+                  id="edit-address1"
+                  value={editForm.addressLine1}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, addressLine1: e.target.value }))
+                  }
+                  disabled={editLoading}
+                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-address2">Address Line 2</Label>
+                <Input
+                  id="edit-address2"
+                  value={editForm.addressLine2}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, addressLine2: e.target.value }))
+                  }
+                  disabled={editLoading}
+                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-city">City</Label>
+                <Input
+                  id="edit-city"
+                  value={editForm.city}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, city: e.target.value }))
+                  }
+                  disabled={editLoading}
+                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-postcode">Postcode</Label>
+                <Input
+                  id="edit-postcode"
+                  value={editForm.postcode}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, postcode: e.target.value }))
+                  }
+                  disabled={editLoading}
+                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-country">Country</Label>
+                <select
+                  id="edit-country"
+                  value={editForm.country}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, country: e.target.value }))
+                  }
+                  disabled={editLoading}
+                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Select country</option>
+                  <option value="GB">United Kingdom</option>
+                  <option value="US">United States</option>
+                  <option value="CA">Canada</option>
+                  <option value="AU">Australia</option>
+                  <option value="IN">India</option>
+                  {/* Add more countries as needed */}
+                </select>
+              </div>
+              {editError && (
+                <div className="text-red-600 text-sm">{editError}</div>
+              )}
+              {editSuccess && (
+                <div className="text-green-600 text-sm">{editSuccess}</div>
+              )}
+              <div className="flex flex-col gap-2">
+                <Button
+                  type="submit"
+                  disabled={editLoading}
+                  className="w-full bg-primary text-primary-foreground rounded py-2 font-semibold hover:bg-primary/90 transition disabled:opacity-50"
+                >
+                  {editLoading ? "Saving..." : "Save"}
+                </Button>
+                <DialogClose asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={editLoading}
+                    className="w-full"
+                  >
+                    Cancel
+                  </Button>
+                </DialogClose>
+              </div>
+            </form>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* Delete User Dialog */}
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent>
+          <DialogTitle>Delete User</DialogTitle>
+          <div>Are you sure you want to delete this user?</div>
+          <div className="flex gap-2 mt-4">
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                if (!deleteUser) return;
+                setDeleteOpen(false);
+                await authClient.admin.removeUser({ userId: deleteUser.id });
+                setPage(1);
+                fetchUsers();
+                fetchStats();
+              }}
+            >
+              Delete
+            </Button>
+            <DialogClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
