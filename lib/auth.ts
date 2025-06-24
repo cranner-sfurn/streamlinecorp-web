@@ -3,6 +3,8 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/lib/db";
 import { admin } from "better-auth/plugins";
 import { user, account, session, verification } from "@/db/schema/auth";
+import { ac, hrManager, adminRole } from "@/lib/permissions";
+
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -17,5 +19,14 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  plugins: [admin()],
+  plugins: [
+    admin({
+      ac,
+      roles: {
+        admin: adminRole,
+        "hr-manager": hrManager,
+      },
+      adminRoles: ["admin"],
+    }),
+  ],
 });
