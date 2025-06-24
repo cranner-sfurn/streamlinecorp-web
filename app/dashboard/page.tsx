@@ -168,7 +168,10 @@ export default function DashboardPage() {
         password: "",
         roles: ["user"],
       });
-      setTimeout(() => setAddOpen(false), 1000);
+      setTimeout(() => {
+        setAddOpen(false);
+        setAddSuccess("");
+      }, 1000);
       setPage(1);
       // Refetch users immediately
       fetchUsers();
@@ -183,7 +186,6 @@ export default function DashboardPage() {
     return <div className="p-8">Loading...</div>;
   }
 
-  // Optionally, you could show a forbidden message if not allowed
   const hasAccess = userRoles.some((role: string) =>
     ALLOWED_ROLES.includes(role)
   );
