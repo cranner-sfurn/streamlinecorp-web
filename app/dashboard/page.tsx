@@ -234,6 +234,70 @@ export default function DashboardPage() {
     }
   }, []);
 
+  async function handleEditUser(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editUser) return;
+    setEditLoading(true);
+    setEditError("");
+    setEditSuccess("");
+    // Generate username as in signup
+    const baseUsername = `${editForm.firstName
+      .trim()
+      .toLowerCase()}.${editForm.surname.trim().toLowerCase()}`.replace(
+      /\s+/g,
+      ""
+    );
+    let username = baseUsername;
+    try {
+      // Optionally, check username availability (skip if unchanged)
+      if (username !== editUser.name) {
+        const res = await fetch("/api/username-exists", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: baseUsername }),
+        });
+        const data = await res.json();
+        if (data?.username) {
+          username = data.username;
+        }
+      }
+      // Update user (name/email) if changed
+      const updateFields: any = {};
+      if (username !== editUser.name) updateFields.name = username;
+      if (editForm.email !== editUser.email)
+        updateFields.email = editForm.email;
+      if (Object.keys(updateFields).length > 0) {
+        await authClient.updateUser({
+          userId: editUser.id,
+          ...updateFields,
+        });
+      }
+      // Update contact details
+      await fetch(`/api/contact-details/${editUser.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          addressLine1: editForm.addressLine1,
+          addressLine2: editForm.addressLine2,
+          city: editForm.city,
+          postcode: editForm.postcode,
+          country: editForm.country,
+        }),
+      });
+      setEditSuccess("User updated!");
+      fetchUsers();
+      fetchStats();
+      setTimeout(() => {
+        setEditOpen(false);
+        setEditSuccess("");
+      }, 1000);
+    } catch (err: any) {
+      setEditError(err?.message || "Failed to update user");
+    } finally {
+      setEditLoading(false);
+    }
+  }
+
   if (isPending || !session) {
     return <div className="p-8">Loading...</div>;
   }
@@ -526,7 +590,7 @@ export default function DashboardPage() {
             <DialogTitle asChild>
               <VisuallyHidden>Edit User</VisuallyHidden>
             </DialogTitle>
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={handleEditUser}>
               <h2 className="text-2xl font-bold mb-4 text-center">Edit User</h2>
               <div className="space-y-2">
                 <Label htmlFor="edit-firstname">First Name</Label>
