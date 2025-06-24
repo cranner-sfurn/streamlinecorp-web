@@ -82,31 +82,27 @@ export default function DashboardPage() {
     }
   }, [session, isPending, router]);
 
-  useEffect(() => {
-    async function fetchStats() {
-      setLoadingStats(true);
-      try {
-        const result = await authClient.admin.listUsers({
-          query: { limit: 10 },
-        });
-        const usersList =
-          (result as any).data?.users || (result as any).users || [];
-        const totalUsers =
-          (result as any).data?.total ?? (result as any).total ?? 0;
-        const hrManagers = usersList.filter((u: any) =>
-          (u.role || "").split(",").includes("hr-manager")
-        ).length;
-        setUserStats({ total: totalUsers, hrManagers });
-      } catch (e) {
-        setUserStats({ total: 0, hrManagers: 0 });
-      } finally {
-        setLoadingStats(false);
-      }
+  async function fetchStats() {
+    setLoadingStats(true);
+    try {
+      const result = await authClient.admin.listUsers({
+        query: { limit: 10 },
+      });
+      const usersList =
+        (result as any).data?.users || (result as any).users || [];
+      const totalUsers =
+        (result as any).data?.total ?? (result as any).total ?? 0;
+      const hrManagers = usersList.filter((u: any) =>
+        (u.role || "").split(",").includes("hr-manager")
+      ).length;
+      setUserStats({ total: totalUsers, hrManagers });
+    } catch (e) {
+      setUserStats({ total: 0, hrManagers: 0 });
+    } finally {
+      setLoadingStats(false);
     }
-    if (session) fetchStats();
-  }, [session]);
+  }
 
-  // Move fetchUsers to top-level so it can be called after user creation
   async function fetchUsers() {
     setLoadingUsers(true);
     try {
@@ -127,7 +123,10 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    if (session) fetchUsers();
+    if (session) {
+      fetchUsers();
+      fetchStats();
+    }
   }, [session, page]);
 
   async function handleAddUser(e: React.FormEvent) {
@@ -175,6 +174,7 @@ export default function DashboardPage() {
       setPage(1);
       // Refetch users immediately
       fetchUsers();
+      fetchStats();
     } catch (err: any) {
       setAddError(err?.message || "Failed to create user");
     } finally {
