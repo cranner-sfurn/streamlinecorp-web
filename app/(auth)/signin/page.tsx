@@ -20,13 +20,13 @@ export default function Signin() {
         {
           email,
           password,
-          callbackURL: "/",
+          callbackURL: "/dashboard",
         },
         {
           onRequest: () => setLoading(true),
           onSuccess: () => {
             setLoading(false);
-            router.push("/");
+            router.push("/dashboard");
           },
           onError: (ctx) => {
             setError(ctx.error?.message || "Something went wrong");

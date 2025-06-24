@@ -41,14 +41,14 @@ export default function Signup() {
           email,
           password,
           name: username,
-          callbackURL: "/",
+          callbackURL: "/dashboard",
         },
         {
           onRequest: () => setLoading(true),
           onSuccess: () => {
             setSuccess(true);
             setLoading(false);
-            router.push("/");
+            router.push("/dashboard");
           },
           onError: (ctx) => {
             setError(ctx.error?.message || "Something went wrong");
