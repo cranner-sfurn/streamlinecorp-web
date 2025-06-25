@@ -10,7 +10,7 @@ export default function Home() {
       <img
         src="/group-of-cute-kitty-cat-family-greeting-cartoon.png"
         alt="A group of cute kitty cats"
-        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-28 h-auto object-contain z-20 pointer-events-none select-none"
+        className="fixed bottom-0 left-1/2 -translate-x-1/2 w-[30vw] h-auto object-contain z-20 pointer-events-none select-none"
         style={{ maxWidth: '100vw' }}
       />
     </div>
