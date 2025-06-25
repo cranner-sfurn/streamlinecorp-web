@@ -36,11 +36,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <NavBar />
-          <div className="flex justify-end w-full px-8 mt-4">
-            <ModeToggle />
+          <div className="flex flex-col min-h-screen">
+            <NavBar />
+            <main className="flex-1">
+              {children}
+            </main>
           </div>
-          {children}
         </ThemeProvider>
       </body>
     </html>

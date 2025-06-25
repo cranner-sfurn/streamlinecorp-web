@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export function NavBar() {
   const { data: session, isPending } = useSession();
@@ -17,7 +18,7 @@ export function NavBar() {
   };
 
   return (
-    <nav className="w-full flex items-center justify-between py-4 px-8 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
+    <nav className="w-full flex items-center justify-between py-2 px-8 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
       <div className="flex items-center gap-4">
         <Link href="/">
           <span className="font-bold text-lg">StreamlineCorp</span>
@@ -51,6 +52,9 @@ export function NavBar() {
             </Button>
           </>
         )}
+        <div className="ml-4">
+          <ModeToggle />
+        </div>
         {/* Example dropdown for future user menu */}
         {/*
         <DropdownMenu>
