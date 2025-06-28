@@ -9,7 +9,7 @@ To learn more about Next.js, take a look at the following resources:
 
 ## Changelog
 
-### 24/06/2025 - milestone
+### 24/06/2025 - Basic Dashboard and Authentication
 #### Issue(s) completed and merged into production
 - #22 Added this remplate for the readme!
 - #24 Setup shadcn components that could be used through the project
