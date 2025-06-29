@@ -98,7 +98,7 @@ export default function DashboardPage() {
         ALLOWED_ROLES.includes(role)
       );
       if (!hasAccess) {
-        router.replace("/signin");
+        router.replace("/");
       }
     }
   }, [session, isPending, router]);
@@ -600,7 +600,7 @@ export default function DashboardPage() {
                     <Button
                       size="icon"
                       variant="ghost"
-                      onClick={() => openEditModal(user)}
+                      onClick={() => router.push(`/dashboard/users/${user.id}`)}
                       title="Edit user"
                     >
                       <Pencil className="w-4 h-4" />
@@ -642,190 +642,6 @@ export default function DashboardPage() {
           </Button>
         </div>
       </div>
-      {/* Edit User Modal */}
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="p-0 bg-transparent border-0 shadow-none flex items-center justify-center">
-          <div className="w-full max-w-md space-y-6 rounded-lg bg-white p-8 shadow-2xl dark:bg-zinc-900">
-            <DialogTitle asChild>
-              <VisuallyHidden>Edit User</VisuallyHidden>
-            </DialogTitle>
-            <form className="space-y-6" onSubmit={handleEditUser}>
-              <h2 className="text-2xl font-bold mb-4 text-center">Edit User</h2>
-              <div className="space-y-2">
-                <Label htmlFor="edit-firstname">First Name</Label>
-                <Input
-                  id="edit-firstname"
-                  value={editForm.firstName}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, firstName: e.target.value }))
-                  }
-                  required
-                  disabled={editLoading}
-                  autoComplete="given-name"
-                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-surname">Surname</Label>
-                <Input
-                  id="edit-surname"
-                  value={editForm.surname}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, surname: e.target.value }))
-                  }
-                  required
-                  disabled={editLoading}
-                  autoComplete="family-name"
-                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-email">Email</Label>
-                <Input
-                  id="edit-email"
-                  type="email"
-                  value={editForm.email}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, email: e.target.value }))
-                  }
-                  required
-                  disabled={editLoading}
-                  autoComplete="email"
-                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Roles</Label>
-                <div className="flex flex-col gap-2">
-                  {assignableRoles.map((role: string) => (
-                    <label
-                      key={role}
-                      className="flex items-center gap-2 text-sm"
-                    >
-                      <Checkbox
-                        checked={editForm.roles.includes(role)}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            setEditForm((f) => ({
-                              ...f,
-                              roles: [...f.roles, role],
-                            }));
-                          } else {
-                            setEditForm((f) => ({
-                              ...f,
-                              roles: f.roles.filter((r: string) => r !== role),
-                            }));
-                          }
-                        }}
-                        disabled={
-                          editLoading || (!canAssignAdmin && role === "admin")
-                        }
-                        id={`edit-role-${role}`}
-                      />
-                      <span>
-                        {role.charAt(0).toUpperCase() + role.slice(1)}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-address1">Address Line 1</Label>
-                <Input
-                  id="edit-address1"
-                  value={editForm.addressLine1}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, addressLine1: e.target.value }))
-                  }
-                  disabled={editLoading}
-                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-address2">Address Line 2</Label>
-                <Input
-                  id="edit-address2"
-                  value={editForm.addressLine2}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, addressLine2: e.target.value }))
-                  }
-                  disabled={editLoading}
-                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-city">City</Label>
-                <Input
-                  id="edit-city"
-                  value={editForm.city}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, city: e.target.value }))
-                  }
-                  disabled={editLoading}
-                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-postcode">Postcode</Label>
-                <Input
-                  id="edit-postcode"
-                  value={editForm.postcode}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, postcode: e.target.value }))
-                  }
-                  disabled={editLoading}
-                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-country">Country</Label>
-                <select
-                  id="edit-country"
-                  value={editForm.country}
-                  onChange={(e) =>
-                    setEditForm((f) => ({ ...f, country: e.target.value }))
-                  }
-                  disabled={editLoading}
-                  className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="">Select country</option>
-                  <option value="GB">United Kingdom</option>
-                  <option value="US">United States</option>
-                  <option value="CA">Canada</option>
-                  <option value="AU">Australia</option>
-                  <option value="IN">India</option>
-                  {/* Add more countries as needed */}
-                </select>
-              </div>
-              {editError && (
-                <div className="text-red-600 text-sm">{editError}</div>
-              )}
-              {editSuccess && (
-                <div className="text-green-600 text-sm">{editSuccess}</div>
-              )}
-              <div className="flex flex-col gap-2">
-                <Button
-                  type="submit"
-                  disabled={editLoading}
-                  className="w-full bg-primary text-primary-foreground rounded py-2 font-semibold hover:bg-primary/90 transition disabled:opacity-50"
-                >
-                  {editLoading ? "Saving..." : "Save"}
-                </Button>
-                <DialogClose asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={editLoading}
-                    className="w-full"
-                  >
-                    Cancel
-                  </Button>
-                </DialogClose>
-              </div>
-            </form>
-          </div>
-        </DialogContent>
-      </Dialog>
       {/* Delete User Dialog */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent>
