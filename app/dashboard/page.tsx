@@ -5,7 +5,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
+import { authClient, updateUser } from "@/lib/auth-client";
 import {
   Table,
   TableHeader,
@@ -279,7 +279,7 @@ export default function DashboardPage() {
         updateFields.role = editForm.roles.join(",");
       }
       if (Object.keys(updateFields).length > 0) {
-        await authClient.updateUser({
+        await updateUser({
           userId: editUser.id,
           ...updateFields,
         });
