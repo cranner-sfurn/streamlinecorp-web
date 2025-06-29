@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { ModeToggle } from "@/components/mode-toggle";
@@ -11,6 +16,12 @@ export function NavBar() {
   const { data: session, isPending } = useSession();
   const userName = session?.user?.name;
   const router = useRouter();
+
+  const userRoles = ((session?.user as any)?.role || "")
+    .split(",")
+    .map((r: string) => r.trim());
+  const showDashboard =
+    userRoles.includes("admin") || userRoles.includes("hr-manager");
 
   const handleSignOut = async () => {
     await signOut();
@@ -28,9 +39,11 @@ export function NavBar() {
         <Button asChild variant="ghost">
           <Link href="/">Home</Link>
         </Button>
-        <Button asChild variant="ghost">
-          <Link href="/dashboard">Dashboard</Link>
-        </Button>
+        {showDashboard && (
+          <Button asChild variant="ghost">
+            <Link href="/dashboard">Dashboard</Link>
+          </Button>
+        )}
         {isPending ? null : userName ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -71,4 +84,4 @@ export function NavBar() {
       </div>
     </nav>
   );
-} 
+}
