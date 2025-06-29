@@ -81,6 +81,7 @@ export default function DashboardPage() {
     city: "",
     postcode: "",
     country: "",
+    roles: ["user"],
   });
   const [editError, setEditError] = useState("");
   const [editSuccess, setEditSuccess] = useState("");
@@ -217,6 +218,7 @@ export default function DashboardPage() {
       city: "",
       postcode: "",
       country: "",
+      roles: (user.role || "user").split(",").map((r: string) => r.trim()),
     });
     try {
       const res = await fetch(`/api/contact-details/${user.id}`);
@@ -266,6 +268,16 @@ export default function DashboardPage() {
       if (username !== editUser.name) updateFields.name = username;
       if (editForm.email !== editUser.email)
         updateFields.email = editForm.email;
+      if (
+        editForm.roles.sort().join(",") !==
+        (editUser.role || "user")
+          .split(",")
+          .map((r: string) => r.trim())
+          .sort()
+          .join(",")
+      ) {
+        updateFields.role = editForm.roles.join(",");
+      }
       if (Object.keys(updateFields).length > 0) {
         await authClient.updateUser({
           userId: editUser.id,
@@ -634,6 +646,41 @@ export default function DashboardPage() {
                   autoComplete="email"
                   className="w-full rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
                 />
+              </div>
+              <div className="space-y-2">
+                <Label>Roles</Label>
+                <div className="flex flex-col gap-2">
+                  {assignableRoles.map((role: string) => (
+                    <label
+                      key={role}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <Checkbox
+                        checked={editForm.roles.includes(role)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setEditForm((f) => ({
+                              ...f,
+                              roles: [...f.roles, role],
+                            }));
+                          } else {
+                            setEditForm((f) => ({
+                              ...f,
+                              roles: f.roles.filter((r: string) => r !== role),
+                            }));
+                          }
+                        }}
+                        disabled={
+                          editLoading || (!canAssignAdmin && role === "admin")
+                        }
+                        id={`edit-role-${role}`}
+                      />
+                      <span>
+                        {role.charAt(0).toUpperCase() + role.slice(1)}
+                      </span>
+                    </label>
+                  ))}
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-address1">Address Line 1</Label>
