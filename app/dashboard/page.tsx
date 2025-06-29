@@ -32,6 +32,7 @@ import { DialogClose } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Pencil, Trash2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ALLOWED_ROLES = ["admin", "hr-manager"];
 const ALL_ROLES = ["admin", "hr-manager", "user"];
@@ -311,7 +312,29 @@ export default function DashboardPage() {
   }
 
   if (isPending || !session) {
-    return <div className="p-8">Loading...</div>;
+    return (
+      <div className="p-8 flex flex-col gap-4">
+        <Skeleton className="h-10 w-1/3 mb-4" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+          <Skeleton className="h-24 w-full rounded-lg" />
+          <Skeleton className="h-24 w-full rounded-lg" />
+          <Skeleton className="h-24 w-full rounded-lg" />
+        </div>
+        <div className="bg-card rounded-lg shadow p-4">
+          <div className="w-full">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center gap-4 py-2">
+                <Skeleton className="h-6 w-1/4" />
+                <Skeleton className="h-6 w-1/4" />
+                <Skeleton className="h-6 w-1/4" />
+                <Skeleton className="h-6 w-1/6" />
+                <Skeleton className="h-6 w-12" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const hasAccess = userRoles.some((role: string) =>
@@ -331,7 +354,11 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <span className="text-2xl font-semibold">
-              {loadingStats ? "..." : userStats.total}
+              {loadingStats ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                userStats.total
+              )}
             </span>
           </CardContent>
         </Card>
@@ -341,7 +368,11 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <span className="text-2xl font-semibold">
-              {loadingStats ? "..." : userStats.hrManagers}
+              {loadingStats ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                userStats.hrManagers
+              )}
             </span>
           </CardContent>
         </Card>
@@ -513,9 +544,25 @@ export default function DashboardPage() {
           </TableHeader>
           <TableBody>
             {loadingUsers ? (
-              <TableRow>
-                <TableCell colSpan={5}>Loading...</TableCell>
-              </TableRow>
+              [...Array(5)].map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell>
+                    <Skeleton className="h-6 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-32" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-20" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-16" />
+                  </TableCell>
+                </TableRow>
+              ))
             ) : users.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5}>No users found.</TableCell>
