@@ -77,8 +77,6 @@ export default function UserDetailsPage() {
         setUser(userData);
         setForm((f) => ({
           ...f,
-          firstName: userData.name?.split(".")[0] || "",
-          surname: userData.name?.split(".")[1] || "",
           email: userData.email,
           roles: (userData.role || "user")
             .split(",")
@@ -144,6 +142,8 @@ export default function UserDetailsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          firstName: form.firstName,
+          surname: form.surname,
           addressLine1: form.addressLine1,
           addressLine2: form.addressLine2,
           city: form.city,

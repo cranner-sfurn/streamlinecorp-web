@@ -48,12 +48,15 @@ export default function ProfilePage() {
         ...f,
         email: session.user.email ?? "",
       }));
-      // Fetch contact details
-      fetch(`/api/contact-details/${session.user.id}`)
+      // Fetch unified user info
+      fetch(`/api/users/${session.user.id}`)
         .then((res) => res.json())
         .then((data) => {
           if (data.contact) {
             setForm((f) => ({ ...f, ...data.contact }));
+          }
+          if (data.user?.email) {
+            setForm((f) => ({ ...f, email: data.user.email }));
           }
         })
         .catch(() => {})
@@ -71,6 +74,7 @@ export default function ProfilePage() {
     setLoading(true);
     try {
       // Only privileged users can update name/email
+      let username = session?.user.name;
       if (isPrivileged) {
         const baseUsername = `${form.firstName
           .trim()
@@ -78,7 +82,7 @@ export default function ProfilePage() {
           /\s+/g,
           ""
         );
-        let username = baseUsername;
+        username = baseUsername;
         if (username !== session?.user.name) {
           const res = await fetch("/api/username-exists", {
             method: "POST",
@@ -90,17 +94,14 @@ export default function ProfilePage() {
             username = data.username;
           }
         }
-        await updateUser({
-          userId: session?.user.id ?? "",
-          name: username,
-          email: form.email,
-        });
       }
-      // Update contact details for all users
-      await fetch(`/api/contact-details/${session?.user.id}`, {
-        method: "POST",
+      // Unified PATCH to update user and contact details
+      const resp = await fetch(`/api/users/${session?.user.id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          name: isPrivileged ? username : undefined,
+          email: isPrivileged ? form.email : undefined,
           firstName: form.firstName,
           surname: form.surname,
           addressLine1: form.addressLine1,
@@ -110,6 +111,10 @@ export default function ProfilePage() {
           country: form.country,
         }),
       });
+      if (!resp.ok) {
+        const errData = await resp.json();
+        throw new Error(errData?.error || "Failed to update profile");
+      }
       setSuccess("Profile updated!");
     } catch (err: any) {
       setError(err?.message || "Failed to update profile");
