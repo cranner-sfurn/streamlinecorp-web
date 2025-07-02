@@ -35,10 +35,8 @@ describe("Navigation", () => {
     cy.contains("button,div", "Dark").click();
     cy.get("html").should("have.class", "dark"); // or whatever your dark mode class is
 
-    // Open the mode toggle dropdown again
-    cy.get('[data-testid="mode-toggle"]').as("btn").click();
     // Click the Light menu item
-    cy.contains("button,div", "Light").click();
+    cy.contains("button,div", "Light").as("lightBtn").click();
     cy.get("html").should("not.have.class", "dark");
   });
 });
