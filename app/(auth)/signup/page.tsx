@@ -31,9 +31,9 @@ export default function Signup() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: baseUsername }),
       });
-      const data = await res.json();
-      if (data?.username) {
-        username = data.username;
+      const usernameData = await res.json();
+      if (usernameData?.username) {
+        username = usernameData.username;
       }
       // Sign up
       const { error } = await authClient.signUp.email(
@@ -45,9 +45,32 @@ export default function Signup() {
         },
         {
           onRequest: () => setLoading(true),
-          onSuccess: () => {
+          onSuccess: async (ctx) => {
             setSuccess(true);
             setLoading(false);
+            // Try to get userId from ctx or session
+            let userId = ctx?.data?.user?.id;
+            if (!userId) {
+              // Fallback: fetch session
+              const sessionRes = await fetch("/api/auth/session");
+              const sessionData = await sessionRes.json();
+              userId = sessionData?.user?.id;
+            }
+            if (userId) {
+              await fetch(`/api/contact-details/${userId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  firstName,
+                  surname,
+                  addressLine1: "",
+                  addressLine2: "",
+                  city: "",
+                  postcode: "",
+                  country: "",
+                }),
+              });
+            }
             router.push("/dashboard");
           },
           onError: (ctx) => {
