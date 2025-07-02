@@ -61,8 +61,8 @@ export const verification = pgTable("verification", {
 });
 
 export const contactDetails = pgTable("contact_details", {
-  id: text("id").primaryKey().notNull(),
-  userId: text("user_id")
+  id: text("id")
+    .primaryKey()
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   addressLine1: text("address_line1"),
