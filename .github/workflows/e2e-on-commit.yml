@@ -1,9 +1,6 @@
 name: E2E Test on Commit
 
 on:
-  push:
-    branches:
-      - "**"
   pull_request:
     branches:
       - "**"
