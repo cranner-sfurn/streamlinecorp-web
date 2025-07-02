@@ -41,7 +41,7 @@ export default function Signup() {
           email,
           password,
           name: username,
-          callbackURL: "/dashboard",
+          callbackURL: "/",
         },
         {
           onRequest: () => setLoading(true),
@@ -57,10 +57,14 @@ export default function Signup() {
               userId = sessionData?.user?.id;
             }
             if (userId) {
-              await fetch(`/api/contact-details/${userId}`, {
-                method: "POST",
+              await fetch(`/api/users/${userId}`, {
+                method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                  id: userId,
+                  name: username,
+                  email,
+                  role: "user",
                   firstName,
                   surname,
                   addressLine1: "",

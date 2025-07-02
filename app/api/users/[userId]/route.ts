@@ -5,9 +5,9 @@ import { eq } from "drizzle-orm";
 
 export async function GET(
   request: NextRequest,
-  context: { params: { userId: string } }
+  context: { params: Promise<{ userId: string }> }
 ) {
-  const userId = context.params.userId;
+  const { userId } = await context.params;
   try {
     const userRes = await db
       .select()
@@ -33,9 +33,9 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  context: { params: { userId: string } }
+  context: { params: Promise<{ userId: string }> }
 ) {
-  const userId = context.params.userId;
+  const { userId } = await context.params;
   try {
     const body = await request.json();
     const {
@@ -82,9 +82,9 @@ export async function POST(
 
 export async function PATCH(
   request: NextRequest,
-  context: { params: { userId: string } }
+  context: { params: Promise<{ userId: string }> }
 ) {
-  const userId = context.params.userId;
+  const { userId } = await context.params;
   try {
     const body = await request.json();
     const {
@@ -129,9 +129,9 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: { userId: string } }
+  context: { params: Promise<{ userId: string }> }
 ) {
-  const userId = context.params.userId;
+  const { userId } = await context.params;
   try {
     await db.delete(user).where(eq(user.id, userId));
     await db.delete(contactDetails).where(eq(contactDetails.id, userId));
