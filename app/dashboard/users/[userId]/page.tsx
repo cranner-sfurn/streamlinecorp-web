@@ -62,32 +62,20 @@ export default function UserDetailsPage() {
       setLoading(true);
       setError("");
       try {
-        // Fetch user details using admin.listUsers with filter
-        const result = await authClient.admin.listUsers({
-          query: {
-            filterField: "id",
-            filterOperator: "eq",
-            filterValue: String(userId),
-          },
-        });
-        const usersList =
-          (result as any).data?.users || (result as any).users || [];
-        const userData = usersList[0];
-        if (!userData) throw new Error("User not found");
-        setUser(userData);
+        // Fetch user and contact details from unified API
+        const res = await fetch(`/api/users/${userId}`);
+        const data = await res.json();
+        if (!data.user) throw new Error("User not found");
+        setUser(data.user);
+        setContact(data.contact);
         setForm((f) => ({
           ...f,
-          email: userData.email,
-          roles: (userData.role || "user")
+          email: data.user.email,
+          roles: (data.user.role || "user")
             .split(",")
             .map((r: string) => r.trim()),
+          ...(data.contact || {}),
         }));
-        const contactRes = await fetch(`/api/contact-details/${userId}`);
-        const contactData = await contactRes.json();
-        if (contactData.contact) {
-          setContact(contactData.contact);
-          setForm((f) => ({ ...f, ...contactData.contact }));
-        }
       } catch (e: any) {
         setError("Failed to fetch user details");
       } finally {
