@@ -10,6 +10,8 @@ import { timestamps } from "../common";
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull().unique(),
+  firstName: text("first_name").notNull(),
+  surname: text("surname").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified")
     .$defaultFn(() => false)
