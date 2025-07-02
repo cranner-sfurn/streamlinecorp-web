@@ -99,13 +99,12 @@ export async function PATCH(
       country,
     } = body;
     // Update user
-    await db
-      .update(user)
-      .set({
-        ...(email && { email }),
-        ...(role && { role }),
-      })
-      .where(eq(user.id, userId));
+    const userUpdate: any = {};
+    if (email) userUpdate.email = email;
+    if (role) userUpdate.role = role;
+    if (Object.keys(userUpdate).length > 0) {
+      await db.update(user).set(userUpdate).where(eq(user.id, userId));
+    }
     // Update contact details (upsert)
     await db.delete(contactDetails).where(eq(contactDetails.id, userId));
     await db.insert(contactDetails).values({
