@@ -71,19 +71,6 @@ export function NavBar() {
         <div className="ml-4">
           <ModeToggle />
         </div>
-        {/* Example dropdown for future user menu */}
-        {/*
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">Menu</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem>Logout</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        */}
       </div>
     </nav>
   );
