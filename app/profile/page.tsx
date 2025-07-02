@@ -44,14 +44,9 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (session) {
-      const [firstName = "", surname = ""] = (session.user.name || "").split(
-        "."
-      );
       setForm((f) => ({
         ...f,
-        firstName,
-        surname,
-        email: session.user.email || "",
+        email: session.user.email ?? "",
       }));
       // Fetch contact details
       fetch(`/api/contact-details/${session.user.id}`)
@@ -96,7 +91,7 @@ export default function ProfilePage() {
           }
         }
         await updateUser({
-          userId: session?.user.id,
+          userId: session?.user.id ?? "",
           name: username,
           email: form.email,
         });
@@ -106,6 +101,8 @@ export default function ProfilePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          firstName: form.firstName,
+          surname: form.surname,
           addressLine1: form.addressLine1,
           addressLine2: form.addressLine2,
           city: form.city,

@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const details = await db
       .select()
       .from(contactDetails)
-      .where(eq(contactDetails.userId, userId))
+      .where(eq(contactDetails.id, userId))
       .limit(1);
 
     return NextResponse.json({ contact: details[0] ?? null });
@@ -39,14 +39,23 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { addressLine1, addressLine2, city, postcode, country } = body;
+    const {
+      firstName,
+      surname,
+      addressLine1,
+      addressLine2,
+      city,
+      postcode,
+      country,
+    } = body;
 
-    await db.delete(contactDetails).where(eq(contactDetails.userId, userId));
-    const id = `${userId}-contact`;
+    await db.delete(contactDetails).where(eq(contactDetails.id, userId));
+    const id = userId;
 
     await db.insert(contactDetails).values({
       id,
-      userId,
+      firstName,
+      surname,
       addressLine1,
       addressLine2,
       city,
