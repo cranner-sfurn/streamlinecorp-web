@@ -108,28 +108,13 @@ export default function UserDetailsPage() {
           username = data.username;
         }
       }
-      // Update user (name/email/roles) if changed
-      const updateFields: any = {};
-      if (username !== user.name) updateFields.name = username;
-      if (form.email !== user.email) updateFields.email = form.email;
-      if (
-        form.roles.sort().join(",") !==
-        (user.role || "user")
-          .split(",")
-          .map((r: string) => r.trim())
-          .sort()
-          .join(",")
-      ) {
-        updateFields.role = form.roles.join(",");
-      }
-      if (Object.keys(updateFields).length > 0) {
-        await updateUser({ userId: user.id, ...updateFields });
-      }
-      // Update contact details
-      await fetch(`/api/contact-details/${user.id}`, {
-        method: "POST",
+      // PATCH unified API with all details
+      await fetch(`/api/users/${user.id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          email: form.email,
+          role: form.roles.join(","),
           firstName: form.firstName,
           surname: form.surname,
           addressLine1: form.addressLine1,
@@ -137,6 +122,7 @@ export default function UserDetailsPage() {
           city: form.city,
           postcode: form.postcode,
           country: form.country,
+          name: username,
         }),
       });
       setSuccess("User updated!");
