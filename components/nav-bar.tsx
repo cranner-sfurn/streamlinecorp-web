@@ -50,6 +50,9 @@ export function NavBar() {
               <Button variant="ghost">{userName}</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link href="/profile">Profile</Link>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={handleSignOut}>
                 Sign Out
               </DropdownMenuItem>
@@ -68,19 +71,6 @@ export function NavBar() {
         <div className="ml-4">
           <ModeToggle />
         </div>
-        {/* Example dropdown for future user menu */}
-        {/*
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">Menu</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem>Logout</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        */}
       </div>
     </nav>
   );

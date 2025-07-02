@@ -62,34 +62,20 @@ export default function UserDetailsPage() {
       setLoading(true);
       setError("");
       try {
-        // Fetch user details using admin.listUsers with filter
-        const result = await authClient.admin.listUsers({
-          query: {
-            filterField: "id",
-            filterOperator: "eq",
-            filterValue: String(userId),
-          },
-        });
-        const usersList =
-          (result as any).data?.users || (result as any).users || [];
-        const userData = usersList[0];
-        if (!userData) throw new Error("User not found");
-        setUser(userData);
+        // Fetch user and contact details from unified API
+        const res = await fetch(`/api/users/${userId}`);
+        const data = await res.json();
+        if (!data.user) throw new Error("User not found");
+        setUser(data.user);
+        setContact(data.contact);
         setForm((f) => ({
           ...f,
-          firstName: userData.name?.split(".")[0] || "",
-          surname: userData.name?.split(".")[1] || "",
-          email: userData.email,
-          roles: (userData.role || "user")
+          email: data.user.email,
+          roles: (data.user.role || "user")
             .split(",")
             .map((r: string) => r.trim()),
+          ...(data.contact || {}),
         }));
-        const contactRes = await fetch(`/api/contact-details/${userId}`);
-        const contactData = await contactRes.json();
-        if (contactData.contact) {
-          setContact(contactData.contact);
-          setForm((f) => ({ ...f, ...contactData.contact }));
-        }
       } catch (e: any) {
         setError("Failed to fetch user details");
       } finally {
@@ -122,33 +108,21 @@ export default function UserDetailsPage() {
           username = data.username;
         }
       }
-      // Update user (name/email/roles) if changed
-      const updateFields: any = {};
-      if (username !== user.name) updateFields.name = username;
-      if (form.email !== user.email) updateFields.email = form.email;
-      if (
-        form.roles.sort().join(",") !==
-        (user.role || "user")
-          .split(",")
-          .map((r: string) => r.trim())
-          .sort()
-          .join(",")
-      ) {
-        updateFields.role = form.roles.join(",");
-      }
-      if (Object.keys(updateFields).length > 0) {
-        await updateUser({ userId: user.id, ...updateFields });
-      }
-      // Update contact details
-      await fetch(`/api/contact-details/${user.id}`, {
-        method: "POST",
+      // PATCH unified API with all details
+      await fetch(`/api/users/${user.id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          email: form.email,
+          role: form.roles.join(","),
+          firstName: form.firstName,
+          surname: form.surname,
           addressLine1: form.addressLine1,
           addressLine2: form.addressLine2,
           city: form.city,
           postcode: form.postcode,
           country: form.country,
+          name: username,
         }),
       });
       setSuccess("User updated!");

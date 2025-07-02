@@ -180,6 +180,32 @@ export default function DashboardPage() {
         password: addForm.password,
         role: addForm.roles.join(",") as any,
       });
+      // Fetch users and find the new user by email
+      let newUserId: string | undefined;
+      try {
+        const result = await authClient.admin.listUsers({
+          query: { limit: 100 },
+        });
+        const usersList =
+          (result as any).data?.users || (result as any).users || [];
+        const newUser = usersList.find((u: any) => u.email === addForm.email);
+        newUserId = newUser?.id;
+      } catch {}
+      if (newUserId) {
+        await fetch(`/api/users/${newUserId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            firstName: addForm.firstName,
+            surname: addForm.surname,
+            addressLine1: "",
+            addressLine2: "",
+            city: "",
+            postcode: "",
+            country: "",
+          }),
+        });
+      }
       setAddSuccess("User created!");
       setAddForm({
         firstName: "",
