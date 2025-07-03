@@ -37,5 +37,23 @@ jobs:
       - name: Build Next.js app
         run: npm run build
 
+      - name: Comment on PR - E2E tests starting
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            🚦 E2E tests are starting for this PR...
+
       - name: Run E2E tests
-        run: npm run test:e2e
+        run: npx cypress run --reporter json --reporter-options "output=results.json"
+
+      - name: Generate E2E test summary
+        run: |
+          mkdir -p scripts
+          node scripts/parse-cypress-results.js
+
+      - name: Comment on PR - E2E test results
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-path: results.md
