@@ -1,4 +1,4 @@
-name: E2E Test on Commit
+name: E2E Test on PR
 
 on:
   pull_request:
