@@ -48,8 +48,8 @@ jobs:
       - name: Build Next.js app
         run: npm run build
 
-      - name: Run E2E tests
-        run: npx cypress run --reporter json --reporter-options "output=results.json"
+      - name: Start Next.js app and run E2E tests
+        run: npx start-server-and-test start http://localhost:3000 'npx cypress run --reporter json --reporter-options "output=results.json"'
 
       - name: Generate E2E test summary
         run: |
