@@ -99,9 +99,13 @@ export default function DashboardPage() {
       );
       if (!hasAccess) {
         router.replace("/");
+        return;
       }
+      fetchUsers();
+      fetchStats();
     }
-  }, [session, isPending, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, isPending, page, router]);
 
   async function fetchStats() {
     setLoadingStats(true);
@@ -142,13 +146,6 @@ export default function DashboardPage() {
       setLoadingUsers(false);
     }
   }
-
-  useEffect(() => {
-    if (session) {
-      fetchUsers();
-      fetchStats();
-    }
-  }, [session, page]);
 
   async function handleAddUser(e: React.FormEvent) {
     e.preventDefault();
