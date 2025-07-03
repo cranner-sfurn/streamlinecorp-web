@@ -57,9 +57,9 @@ jobs:
         id: run_e2e
         run: |
           set -o pipefail
-          npm run test:e2e 2>&1 | tee e2e-output.log
+          npx cypress run --reporter json --reporter-options "output=cypress/results.json" 2>&1 | tee e2e-output.log
 
-      - name: Edit PR comment - E2E test results
+      - name: Edit PR comment - E2E test results (clean summary)
         uses: actions/github-script@v7
         if: github.event_name == 'pull_request'
         with:
@@ -73,13 +73,27 @@ jobs:
             const botComment = comments.reverse().find(c => c.body && c.body.includes(marker));
             if (!botComment) throw new Error('No E2E status comment found to update.');
             const fs = require('fs');
-            let output = fs.readFileSync('e2e-output.log', 'utf8');
-            if (output.length > 65000) {
-              output = output.slice(0, 65000) + '\n... (truncated)';
+            let summary = '';
+            try {
+              const results = JSON.parse(fs.readFileSync('cypress/results.json', 'utf8'));
+              if (results && results.results && results.results.suites) {
+                summary += '### Cypress E2E Test Results\n';
+                for (const suite of results.results.suites) {
+                  if (suite.title) summary += `\n**${suite.title}**\n`;
+                  for (const test of suite.tests) {
+                    const status = test.state === 'passed' ? '✅' : (test.state === 'failed' ? '❌' : '⚠️');
+                    summary += `- ${status} ${test.title}\n`;
+                  }
+                }
+              } else {
+                summary = 'No test results found.';
+              }
+            } catch (e) {
+              summary = 'Failed to parse Cypress results.\n\n' + e.toString();
             }
             await github.rest.issues.updateComment({
               comment_id: botComment.id,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `${marker}\n✅ E2E test results:\n\n${output}`
+              body: `${marker}\n${summary}`
             });
