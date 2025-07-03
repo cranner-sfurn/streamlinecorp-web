@@ -5,6 +5,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
 export default function Signup() {
+  // Bunch of state variables to store the form data and loading state
   const [firstName, setFirstName] = useState("");
   const [surname, setSurname] = useState("");
   const [email, setEmail] = useState("");
@@ -14,28 +15,31 @@ export default function Signup() {
   const [success, setSuccess] = useState(false);
   const router = useRouter();
 
+  // Handle the signup form submission
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(false);
-    setLoading(true);
+    setError(null); // Reset the error state
+    setSuccess(false); // Reset the success state
+    setLoading(true); // Set the loading state to true, this is used to disable the submit button
+
     // Generate username
     const baseUsername = `${firstName.trim().toLowerCase()}.${surname
       .trim()
       .toLowerCase()}`.replace(/\s+/g, "");
     let username = baseUsername;
+    // check if the username is in use already
     try {
       // Get available username from API
       const res = await fetch("/api/username-exists", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: baseUsername }),
-      });
+      }); // returns the username that will be used
       const usernameData = await res.json();
       if (usernameData?.username) {
         username = usernameData.username;
       }
-      // Sign up
+      // Sign up the user
       const { error } = await authClient.signUp.email(
         {
           email,
@@ -56,6 +60,7 @@ export default function Signup() {
               const sessionData = await sessionRes.json();
               userId = sessionData?.user?.id;
             }
+            // If the user is logged in, update the user's details
             if (userId) {
               await fetch(`/api/users/${userId}`, {
                 method: "PATCH",
