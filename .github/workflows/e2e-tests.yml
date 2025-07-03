@@ -49,15 +49,18 @@ jobs:
         run: npm run build
 
       - name: Start Next.js app and run E2E tests
-        run: npx start-server-and-test start http://localhost:3000 'npx cypress run --reporter json --reporter-options "output=results.json"'
+        run: npx start-server-and-test start http://localhost:3000 'npx cypress run --reporter mochawesome --reporter-options reportDir=.,overwrite=true,html=false,json=true'
 
       - name: Generate E2E test summary
+        id: summary
         run: |
-          mkdir -p scripts
-          node scripts/parse-cypress-results.js
+          node scripts/parse-cypress-results.js mochawesome.json > results.md
+          echo "result<<EOF" >> $GITHUB_OUTPUT
+          cat results.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Comment on PR - E2E test results
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          body-path: results.md
+          body: ${{ steps.summary.outputs.result }}

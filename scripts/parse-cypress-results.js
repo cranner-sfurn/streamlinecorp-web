@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-const resultsPath = "results.json";
+const resultsPath = process.argv[2] || "mochawesome.json";
 const outputPath = "results.md";
 
 function main() {
@@ -15,29 +15,30 @@ function main() {
   let totalPassed = 0;
   let totalFailed = 0;
 
-  if (!results.runs || results.runs.length === 0) {
+  if (!results.results || results.results.length === 0) {
     md += "No test runs found.";
     fs.writeFileSync(outputPath, md);
     return;
   }
 
-  results.runs.forEach((run) => {
-    md += `### Spec: \`${run.spec.name}\`\n`;
-    if (!run.tests || run.tests.length === 0) {
+  results.results.forEach((run) => {
+    md += `### Spec: \`${run.file}\`\n`;
+    if (!run.suites || run.suites.length === 0) {
       md += "- ⚠️ No tests found in this spec.\n";
       return;
     }
-    run.tests.forEach((test) => {
-      totalTests++;
-      const status =
-        test.state === "passed" ? "✅" : test.state === "failed" ? "❌" : "⚠️";
-      if (test.state === "passed") totalPassed++;
-      if (test.state === "failed") totalFailed++;
-      md += `- ${status} ${test.title.join(" > ")}`;
-      if (test.state === "failed" && test.displayError) {
-        md += `\n    - Error: \`${test.displayError.split("\n")[0]}\``;
-      }
-      md += "\n";
+    run.suites.forEach((suite) => {
+      suite.tests.forEach((test) => {
+        totalTests++;
+        const status = test.pass ? "✅" : test.fail ? "❌" : "⚠️";
+        if (test.pass) totalPassed++;
+        if (test.fail) totalFailed++;
+        md += `- ${status} ${test.fullTitle}`;
+        if (test.fail && test.err && test.err.message) {
+          md += `\n    - Error: \`${test.err.message.split("\n")[0]}\``;
+        }
+        md += "\n";
+      });
     });
     md += "\n";
   });
