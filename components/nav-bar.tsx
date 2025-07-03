@@ -13,20 +13,22 @@ import { useRouter } from "next/navigation";
 import { ModeToggle } from "@/components/mode-toggle";
 
 export function NavBar() {
-  const { data: session, isPending } = useSession();
+  const { data: session, isPending } = useSession(); // Get the session data from auth so we can use it to display specific things depending on roles/login status, isPending is used to check if the session is loading
   const userName = session?.user?.name;
   const router = useRouter();
 
   const userRoles = ((session?.user as any)?.role || "")
     .split(",")
     .map((r: string) => r.trim());
+  // Breakdown the user roles for later use
   const showDashboard =
     userRoles.includes("admin") || userRoles.includes("hr-manager");
+  // Only show the dashboard nav link for admins and hr-managers
 
   const handleSignOut = async () => {
     await signOut();
     router.push("/");
-  };
+  }; // When clicked, sign out the user and redirect to the home page
 
   return (
     <nav className="w-full flex items-center justify-between py-2 px-8 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
