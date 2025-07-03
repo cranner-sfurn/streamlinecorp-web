@@ -25,3 +25,8 @@ jobs:
 
       - name: Run E2E tests
         run: npm run test:e2e
+
+        env:
+          BETTER_AUTH_URL: ${{ secrets.BETTER_AUTH_URL }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
