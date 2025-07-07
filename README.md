@@ -15,3 +15,10 @@ To learn more about Next.js, take a look at the following resources:
 - #24 Setup shadcn components that could be used through the project
 - #29 Added authentication with /signup and /signin
 - #30 Added a /dashboard route for admins and hr managers to see users, manage, and create new ones. 
+
+### 07/06/2025 - Expanded database
+#### Issue(s) completed and merged into production
+- #6 Added a hero page
+- #15 Ability for HR Managers/Admins to manage other users
+- #12 Ability to manage your own details
+- #23 Automated testing project setup
