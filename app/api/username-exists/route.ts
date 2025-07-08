@@ -29,5 +29,5 @@ export async function POST(req: Request) {
     i++;
     nextUsername = `${username}${i}`;
   }
-  return NextResponse.json({ username: nextUsername });
+  return NextResponse.json({ username: nextUsername }); // returns the username that will be used
 }
